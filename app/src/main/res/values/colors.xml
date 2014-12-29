@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="actionbar_color">#3F51B5</color>
+    <color name="statusbar_color">#303F9F</color>
+    <color name="post_unclicked_color">#ffffffff</color>
+    <color name="tab_color">#ff2d2d2d</color>
+    <color name="unclicked_link_color">#ff1700a7</color>
+    <color name="clicked_link_color">#ff570093</color>
+    <color name="username_color">#ff858585</color>
+</resources>

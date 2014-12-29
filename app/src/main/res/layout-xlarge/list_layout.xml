@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="2dp">
+    <TextView
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:id="@+id/title_textView"
+        android:paddingTop="@dimen/text_view_padding"
+        android:paddingBottom="@dimen/text_view_padding"
+        android:textColor="#000000"
+        android:text="TITLE"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/upvotes_textView"
+    />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="USERNAME"
+        android:id="@+id/user_textView"
+        android:layout_below="@+id/title_textView"
+        android:layout_alignParentStart="true"
+    />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/upvotes_textView"
+        android:text="UPVOTES"
+        android:textColor="#ffff9132"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:paddingTop="@dimen/text_view_padding"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/age_textView"
+        android:text="AGE"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/title_textView"
+        android:textColor="#000000"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title_textView"
+        android:text="URL"
+        android:layout_toEndOf="@id/user_textView"
+        android:id="@+id/url_textView"
+        android:layout_marginStart="8dp"/>
+
+    <!--
+    <ImageView
+        android:layout_width="@dimen/thumbnail_size"
+        android:layout_height="@dimen/thumbnail_size"
+        android:id="@+id/image_ImageView"
+        android:src="@drawable/default_thumbnail"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+        -->
+</RelativeLayout>
