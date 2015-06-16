@@ -1,3 +1,4 @@
+/*
 package example.nini1294.rslash;
 
 import android.content.Intent;
@@ -21,9 +22,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+*/
 /**
  * Created by Nishant on 19/12/14.
- */
+ *//*
+
 public class DownloadClass extends AsyncTask<android.support.v4.app.Fragment, Integer, JSONObject>{
 
     public static final String ARG_NAME = "subreddit_name";
@@ -100,3 +103,4 @@ public class DownloadClass extends AsyncTask<android.support.v4.app.Fragment, In
         });
     }
 }
+*/

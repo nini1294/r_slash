@@ -1,5 +1,6 @@
 package example.nini1294.rslash;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -14,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,20 +36,25 @@ public class SubredditFragment extends Fragment {
     public static final String ARG_POS = "pos";
     public static final String ARG_NAME = "subreddit_name";
 
+    public View rootView;
+    public ListView titles;
+    public String subredditName;
+    public List<Post> list;
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.subreddit_fragment, container, false);
+        rootView = inflater.inflate(R.layout.subreddit_fragment, container, false);
+        titles = (ListView) rootView.findViewById(R.id.titles_listView);
         Bundle args = getArguments();
-        final ListView titles = (ListView) rootView.findViewById(R.id.titles_listView);
-        final List<Post> list = new ArrayList<>();
-        String subredditName = args.getString(ARG_NAME);
+        subredditName = args.getString(ARG_NAME);
+        list = new ArrayList<>();
         JSONObject js = null;
         try {
+            Toast.makeText(getActivity().getApplicationContext(), subredditName, Toast.LENGTH_SHORT).show();
             URL url = new URL("http://www.reddit.com/r/" + subredditName + "/hot.json");
-            js = new DownloadClass().execute(url).get();
+//            js = new DownloadClass().execute(url).get();
+            new DownloadClass().execute(url);
         } catch (MalformedURLException e) {
             Log.e("Error", e.getMessage());
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
         }
         if (js != null) {
             try {
@@ -63,7 +70,7 @@ public class SubredditFragment extends Fragment {
                 Log.i("JSON Problem", e.getMessage());
             }
         }
-        titles.setAdapter(new SampleAdapter(getActivity().getApplicationContext(), list));
+        /*titles.setAdapter(new SampleAdapter(getActivity().getApplicationContext(), list));
         titles.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -76,7 +83,7 @@ public class SubredditFragment extends Fragment {
                     startActivity(intent);
                 }
             }
-        });
+        });*/
         return rootView;
     }
 
@@ -175,12 +182,41 @@ public class SubredditFragment extends Fragment {
 
         @Override
         protected void onPostExecute(JSONObject js) {
+            super.onPostExecute(js);
             if (js != null) {
-//                Log.i("Timing", "Set text somewhere");
-                super.onPostExecute(js);
+                Log.i("Timing", "Set text somewhere");
+                if (js != null) {
+                    try {
+                        js = js.getJSONObject("data");
+                        JSONArray jsArray = js.getJSONArray("children");
+                        for (int i = 0; i < jsArray.length(); i++) {
+                            JSONObject ob = jsArray.getJSONObject(i).getJSONObject("data");
+                            list.add(new Post(ob.getString("title"), ob.getString("author"), ob.optString("url"),
+                                    ob.getString("thumbnail"), ob.getString("score"), ob.getDouble("created_utc"), ob.getBoolean("is_self")));
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.i("JSON Problem", e.getMessage());
+                    }
+                }
             } else {
                 Log.i("Info", "List is null");
             }
+            titles.setAdapter(new SampleAdapter(getActivity().getApplicationContext(), list));
+            ((ArrayAdapter) titles.getAdapter()).notifyDataSetChanged();
+            titles.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    TextView tv = (TextView) view.findViewById(R.id.url_textView);
+                    tv.setTextColor(getResources().getColor(R.color.clicked_link_color));
+                    if (!list.get(position).getSelf()) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        Uri uri = Uri.parse(list.get(position).getURL().toString());
+                        intent.setData(uri);
+                        startActivity(intent);
+                    }
+                }
+            });
         }
     }
 
