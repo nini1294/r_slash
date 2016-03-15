@@ -1,9 +1,12 @@
 package example.nini1294.rslash;
 
+import android.provider.Settings;
 import android.text.format.Time;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 /**
  * Created by Nishant on 26/12/14.
@@ -23,10 +26,9 @@ public class Post {
         this.imageUrl = imageUrl;
         this.upvotes = upvotes;
         this.isSelf = isSelf;
-        Time ttime = new Time("UTC");
-        ttime.set(((Double) age).longValue());
-        ttime.switchTimezone(Time.getCurrentTimezone());
-        long temp = System.currentTimeMillis() - ttime.toMillis(true) * 1000;
+        GregorianCalendar ttime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        ttime.setTimeInMillis(((Double) age).longValue());
+        long temp = System.currentTimeMillis() - ttime.getTimeInMillis();
         if (temp < 60000) {
             this.age = "Just Now";
         } else if (temp / 60000 < 60) {

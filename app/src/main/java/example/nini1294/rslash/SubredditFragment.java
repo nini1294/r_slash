@@ -31,20 +31,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 public class SubredditFragment extends Fragment {
 
     public static final String ARG_POS = "pos";
     public static final String ARG_NAME = "subreddit_name";
 
-    public View rootView;
-    public ListView titles;
-    public String subredditName;
-    public List<Post> list;
+    private String subredditName;
+    private List<Post> list;
+    private View rootView;
+    @Bind(R.id.titles_listView) public ListView titles;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.subreddit_fragment, container, false);
-        titles = (ListView) rootView.findViewById(R.id.titles_listView);
         Bundle args = getArguments();
+        rootView = inflater.inflate(R.layout.subreddit_fragment, container, false);
+        ButterKnife.bind(this, rootView);
         subredditName = args.getString(ARG_NAME);
         list = new ArrayList<>();
         JSONObject js = null;
@@ -97,52 +100,37 @@ public class SubredditFragment extends Fragment {
         public View getView(int position, View convertView, ViewGroup parent) {
             Post post = getItem(position);
             PostViewHolder viewHolder;
+            LayoutInflater inflater = LayoutInflater.from(getContext());
 
             if (convertView == null) {
-                viewHolder = new PostViewHolder();
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_layout, parent, false);
-                viewHolder.title = (TextView) convertView.findViewById(R.id.title_textView);
-                viewHolder.userName = (TextView) convertView.findViewById(R.id.user_textView);
-                viewHolder.upvotes = (TextView) convertView.findViewById(R.id.upvotes_textView);
-                viewHolder.age = (TextView) convertView.findViewById(R.id.age_textView);
-                viewHolder.url = (TextView) convertView.findViewById(R.id.url_textView);
+                convertView = inflater.inflate(R.layout.list_layout, parent, false);
+                viewHolder = new PostViewHolder(convertView);
 //                viewHolder.thumbnail = (ImageView) convertView.findViewById(R.id.image_ImageView);
                 convertView.setTag(viewHolder);
                 convertView.setBackgroundColor(this.getContext().getResources().getColor(R.color.post_unclicked_color));
             } else {
                 viewHolder = (PostViewHolder) convertView.getTag();
             }
-
             viewHolder.title.setText(post.getTitle());
             viewHolder.userName.setText(post.getUserName());
             viewHolder.upvotes.setText(post.getUpvotes());
             viewHolder.age.setText(post.getAge());
             viewHolder.url.setText(post.getURLString());
-            /*if ((post.getImageURL().equals("self")) || (post.getImageURL().equals(""))) {
-                viewHolder.thumbnail.setImageResource(R.drawable.default_thumbnail);
-            } else {
-                try {
-                    viewHolder.thumbnail.setImageBitmap(new ImageDownloadClass().execute(post.getImageURL()).get());
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                }
-            }*/
-
             return convertView;
         }
 
     }
 
     static class PostViewHolder {
-        TextView title;
-        TextView userName;
-        TextView upvotes;
-        TextView age;
-        TextView url;
+        @Bind(R.id.title_textView) TextView title;
+        @Bind(R.id.user_textView) TextView userName;
+        @Bind(R.id.upvotes_textView) TextView upvotes;
+        @Bind(R.id.age_textView) TextView age;
+        @Bind(R.id.url_textView) TextView url;
 //        ImageView thumbnail;
-
+        public PostViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
     }
 
     private class DownloadClass extends AsyncTask<URL, Integer, JSONObject> {
