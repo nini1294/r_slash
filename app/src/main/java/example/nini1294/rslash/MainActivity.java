@@ -1,16 +1,18 @@
 package example.nini1294.rslash;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
@@ -21,6 +23,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -29,19 +32,23 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 
 public class MainActivity extends FragmentActivity {
 
     private static final String PREFS_NAME = "MyPrefsFile";
     private static final String SET_NAME = "SubList";
     private static CollectionPagerAdapter mCollectionPagerAdapter;
-    ViewPager mViewPager;
+    @Bind(R.id.pager) ViewPager mViewPager;
     Set<String> titles;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_collection);
+        ButterKnife.bind(this);
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         titles = settings.getStringSet(SET_NAME, new TreeSet<String>());
         for(String title : titles) {
@@ -51,14 +58,14 @@ public class MainActivity extends FragmentActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window w = getWindow();
             w.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            w.setStatusBarColor(getResources().getColor(R.color.statusbar_color));
+            w.setStatusBarColor(ContextCompat.getColor(this, R.color.statusBarColor));
         }
 
 //        ActionBar actionBar = getActionBar();
 
         mCollectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
-        mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mCollectionPagerAdapter);
+        mCollectionPagerAdapter.notifyDataSetChanged();
 
     }
 
@@ -78,11 +85,11 @@ public class MainActivity extends FragmentActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_new) {
             NewSubDialog dialog = new NewSubDialog();
-            dialog.show(getFragmentManager(), "NewSubDialog");
+            dialog.show(getSupportFragmentManager(), "NewSubDialog");
             return true;
         } else if (id == R.id.action_remove) {
             RemoveSubDialog dialog = new RemoveSubDialog();
-            dialog.show(getFragmentManager(), "RemoveSubDialog");
+            dialog.show(getSupportFragmentManager(), "RemoveSubDialog");
             return true;
         }
 
@@ -95,6 +102,7 @@ public class MainActivity extends FragmentActivity {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setMessage("Add a new subreddit");
             final EditText input = new EditText(getActivity());
+            input.setSingleLine(true);
             input.requestFocus();
             builder.setView(input);
             builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
