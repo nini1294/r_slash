@@ -2,6 +2,8 @@ package example.nini1294.rslash.POJOs;
 
 import android.util.Log;
 
+import com.google.gson.annotations.Expose;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.GregorianCalendar;
@@ -14,6 +16,7 @@ public class Post {
     private String title;
     private String author;
     private URL url;
+    private String URLString;
     private String thumbnail;
     private String score;
     private long created;
@@ -27,6 +30,7 @@ public class Post {
         this.is_self = is_self;
         try {
             this.url = new URL(url);
+            this.URLString = url; // raw url string
 //                Log.i("Lgo - Post", url.toString());
 
         } catch (MalformedURLException e) {
@@ -50,6 +54,10 @@ public class Post {
         return this.url;
     }
 
+    public String getURLString() {
+        return URLString;
+    }
+
     public String getScore() {
         return score;
     }
@@ -61,7 +69,6 @@ public class Post {
     public String getAge() {
         String age;
         long temp = System.currentTimeMillis() - this.created * 1000;
-        Log.i("Post", "Millis " + temp );
         if (temp < 60000) {
             age = "Just Now";
         } else if (temp / 60000 < 60) {
@@ -76,7 +83,7 @@ public class Post {
         return age;
     }
 
-    public String getURLString() {
+    public String getURLHost() {
         if(is_self) {
             return "self";
         } else {

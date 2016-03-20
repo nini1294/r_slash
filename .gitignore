@@ -5,5 +5,6 @@ local.properties
 gradle/
 .DS_Store
 *.iml
+app/app.iml
 apk/
 gradlew.bat
