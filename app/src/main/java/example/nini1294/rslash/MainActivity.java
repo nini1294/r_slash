@@ -1,12 +1,11 @@
 package example.nini1294.rslash;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -17,43 +16,51 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ListView;
+import android.widget.Toast;
+
+import com.cesarferreira.rxpaper.RxPaper;
+import com.orhanobut.logger.Logger;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import example.nini1294.rslash.Dialogs.AddSubDialog;
+import example.nini1294.rslash.Dialogs.RemoveSubDialog;
+import example.nini1294.rslash.POJOs.SubredditResponse;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends FragmentActivity implements RemoveSubDialog.SubRemovedListener, AddSubDialog.SubAddedListener {
 
     private static final String PREFS_NAME = "MyPrefsFile";
-    private static final String SET_NAME = "SubList";
+    public static final String LIST_NAME = "SubList";
     private static CollectionPagerAdapter mCollectionPagerAdapter;
-    @Bind(R.id.pager) ViewPager mViewPager;
-    Set<String> titles;
+    @Bind(R.id.pager)
+    ViewPager mViewPager;
+    ArrayList<String> titles;
+    ArrayList<String> defaultTitles = new ArrayList<>();
+    CompositeSubscription paperSubs;
+    CompositeSubscription bindingSubs;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_collection);
         ButterKnife.bind(this);
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        titles = settings.getStringSet(SET_NAME, new TreeSet<String>());
-        for(String title : titles) {
-            Log.i("Data", title);
-        }
+        Logger.init();
+        paperSubs = new CompositeSubscription();
+        bindingSubs = new CompositeSubscription();
+//        defaultTitles.add("android");
+        readTitles();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window w = getWindow();
@@ -62,11 +69,12 @@ public class MainActivity extends FragmentActivity {
         }
 
 //        ActionBar actionBar = getActionBar();
+    }
 
-        mCollectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
-        mViewPager.setAdapter(mCollectionPagerAdapter);
-        mCollectionPagerAdapter.notifyDataSetChanged();
-
+    @Override
+    protected void onDestroy() {
+        paperSubs.unsubscribe();
+        super.onDestroy();
     }
 
     @Override
@@ -84,11 +92,14 @@ public class MainActivity extends FragmentActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_new) {
-            NewSubDialog dialog = new NewSubDialog();
+            AddSubDialog dialog = new AddSubDialog();
             dialog.show(getSupportFragmentManager(), "NewSubDialog");
             return true;
         } else if (id == R.id.action_remove) {
             RemoveSubDialog dialog = new RemoveSubDialog();
+            Bundle args = new Bundle();
+            args.putStringArrayList(LIST_NAME, titles);
+            dialog.setArguments(args);
             dialog.show(getSupportFragmentManager(), "RemoveSubDialog");
             return true;
         }
@@ -96,96 +107,86 @@ public class MainActivity extends FragmentActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public static class NewSubDialog extends DialogFragment {
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstaceState) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setMessage("Add a new subreddit");
-            final EditText input = new EditText(getActivity());
-            input.setSingleLine(true);
-            input.requestFocus();
-            builder.setView(input);
-            builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    SharedPreferences settings = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-                    SharedPreferences.Editor editor = settings.edit();
-                    Set<String> temp = settings.getStringSet(SET_NAME, new TreeSet<String>());
-                    if (!input.getText().toString().equals("")) {
-                        temp.add(input.getText().toString().toLowerCase());
-                    }
-                    editor.putStringSet(SET_NAME, temp);
-                    editor.apply();
+    // Add Observer
+    @Override
+    public void addSub(String sub) {
+        // Verify that the subreddit is valid
+        App.api.getSubredditHot(sub).enqueue(new Callback<SubredditResponse>() {
+            @Override
+            public void onResponse(Call<SubredditResponse> call, Response<SubredditResponse> response) {
+                if (response.isSuccessful() && (response.body().getData().getPosts().size() > 0)) {
+                    titles.add(sub);
+                    writeTitles();
                     mCollectionPagerAdapter.notifyDataSetChanged();
-//                    mCollectionPagerAdapter.startUpdate();
+                } else {
+                    Toast.makeText(MainActivity.this, "That is an invalid subreddit", Toast.LENGTH_SHORT).show();
                 }
-            }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    // Nothing
-                }
-            });
-            return builder.create();
-        }
+            }
+
+            @Override
+            public void onFailure(Call<SubredditResponse> call, Throwable t) {
+            }
+        });
+
     }
 
-    public static class RemoveSubDialog extends DialogFragment {
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setMessage("Remove a subreddit");
-            final SharedPreferences settings = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            Set<String> subs = settings.getStringSet(SET_NAME, new TreeSet<String>());
-            Iterator<String> iterator = subs.iterator();
-            final List<String> list = new ArrayList<>();
-            for (int i = 0; i < subs.size(); i++) {
-                list.add(iterator.next());
-            }
-            for (CharSequence chars : list) {
-                Log.i("Lgo", chars.toString());
-            }
-            final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity().getApplicationContext(), android.R.layout.simple_list_item_1,
-                    android.R.id.text1, list);
-            final ListView lv = new ListView(getActivity());
-            lv.setAdapter(adapter);
-            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    String item = adapter.getItem(position);
-                    SharedPreferences.Editor editor = settings.edit();
-                    Set<String> temp = settings.getStringSet(SET_NAME, new TreeSet<String>());
-                    temp.remove(item);
-                    editor.putStringSet(SET_NAME, temp);
-                    editor.apply();
-                    list.remove(position);
-                    adapter.notifyDataSetChanged();
-                    mCollectionPagerAdapter.notifyDataSetChanged();
-                }
-            });
-            builder.setView(lv);
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    //Nothing
-                }
-            });
+    // Remove Observer
+    @Override
+    public void removeSub(String sub) {
+        titles.remove(sub);
+        writeTitles();
+        mCollectionPagerAdapter.notifyDataSetChanged();
+    }
 
-            return builder.create();
-        }
+    private void readTitles() {
+        paperSubs.add(RxPaper.with(this).read(LIST_NAME, defaultTitles)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((list) -> {
+                    titles = list;
+                    initializeViewPager();
+                }));
+    }
+
+    private void writeTitles() {
+        paperSubs.add(RxPaper.with(this).write(LIST_NAME, titles)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe());
+    }
+
+    private void initializeViewPager() {
+        mCollectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
+        mViewPager.setAdapter(mCollectionPagerAdapter);
+        mCollectionPagerAdapter.notifyDataSetChanged();
     }
 
     class CollectionPagerAdapter extends FragmentStatePagerAdapter {
         public CollectionPagerAdapter(FragmentManager fm) {
             super(fm);
         }
+
         @Override
         public Fragment getItem(int i) {
             Fragment fragment = new SubredditFragment();
             Bundle args = new Bundle();
             args.putInt(SubredditFragment.ARG_POS, i + 1);
-            args.putString(SubredditFragment.ARG_NAME, titles.toArray()[i].toString());
+            args.putString(SubredditFragment.ARG_NAME, titles.get(i));
             fragment.setArguments(args);
             return fragment;
+        }
+
+        @Override
+        public int getItemPosition(Object object) {
+            SubredditFragment f = (SubredditFragment) object;
+            String subName = f.getSubredditName();
+            int position = titles.indexOf(subName);
+            if (position >= 0) {
+                return position;
+            } else {
+                return POSITION_NONE;
+            }
+//            return super.getItemPosition(object);
         }
 
         @Override
@@ -195,9 +196,8 @@ public class MainActivity extends FragmentActivity {
 
         @Override
         public CharSequence getPageTitle(int position) {
-            Object[] al = titles.toArray();
             if (titles.size() >= 1) {
-                return al[position].toString();
+                return titles.get(position);
             } else {
                 return "NOPE";
             }
