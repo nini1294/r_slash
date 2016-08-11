@@ -2,6 +2,7 @@ package example.nini1294.rslash;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.orhanobut.logger.Logger;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

@@ -1,8 +1,10 @@
 package example.nini1294.rslash.POJOs;
 
+import android.net.Uri;
 import android.util.Log;
 
 import com.google.gson.annotations.Expose;
+import com.orhanobut.logger.Logger;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -31,8 +33,6 @@ public class Post {
         try {
             this.url = new URL(url);
             this.URLString = url; // raw url string
-//                Log.i("Lgo - Post", url.toString());
-
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -91,13 +91,12 @@ public class Post {
         }
     }
 
-    public boolean getSelf() {
+    public boolean isSelf() {
         return is_self;
     }
 
     public String toString() {
-        return this.getTitle() + ":" + this.getUsername() + "\nURL:" + this.getURL().toString()
-                + "\nImage:" + this.getImageURL();
+        return this.getTitle() + ":" + this.getUsername() + "\nURL:" + this.getURL().toString();
     }
 
 

@@ -1,32 +1,26 @@
 package example.nini1294.rslash;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.Toast;
 
-import com.cesarferreira.rxpaper.RxPaper;
+import com.pacoworks.rxpaper.*;
 import com.orhanobut.logger.Logger;
 
 import java.util.ArrayList;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import example.nini1294.rslash.Dialogs.AddSubDialog;
 import example.nini1294.rslash.Dialogs.RemoveSubDialog;
@@ -39,13 +33,13 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 
-public class MainActivity extends FragmentActivity implements RemoveSubDialog.SubRemovedListener, AddSubDialog.SubAddedListener {
+public class MainActivity extends AppCompatActivity implements RemoveSubDialog.SubRemovedListener, AddSubDialog.SubAddedListener {
 
     private static final String PREFS_NAME = "MyPrefsFile";
     public static final String LIST_NAME = "SubList";
     private static CollectionPagerAdapter mCollectionPagerAdapter;
-    @Bind(R.id.pager)
-    ViewPager mViewPager;
+    @BindView(R.id.pager) ViewPager mViewPager;
+    @BindView(R.id.main_toolbar) Toolbar mToolbar;
     ArrayList<String> titles;
     ArrayList<String> defaultTitles = new ArrayList<>();
     CompositeSubscription paperSubs;
@@ -56,11 +50,13 @@ public class MainActivity extends FragmentActivity implements RemoveSubDialog.Su
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_collection);
         ButterKnife.bind(this);
+        RxPaperBook.init(this);
         Logger.init();
         paperSubs = new CompositeSubscription();
         bindingSubs = new CompositeSubscription();
-//        defaultTitles.add("android");
+        setSupportActionBar(mToolbar);
         readTitles();
+        mViewPager = (ViewPager) findViewById(R.id.pager);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window w = getWindow();
@@ -139,7 +135,7 @@ public class MainActivity extends FragmentActivity implements RemoveSubDialog.Su
     }
 
     private void readTitles() {
-        paperSubs.add(RxPaper.with(this).read(LIST_NAME, defaultTitles)
+        paperSubs.add(RxPaperBook.with().read(LIST_NAME, defaultTitles)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe((list) -> {
@@ -149,7 +145,7 @@ public class MainActivity extends FragmentActivity implements RemoveSubDialog.Su
     }
 
     private void writeTitles() {
-        paperSubs.add(RxPaper.with(this).write(LIST_NAME, titles)
+        paperSubs.add(RxPaperBook.with().write(LIST_NAME, titles)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe());

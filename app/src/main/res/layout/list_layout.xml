@@ -2,17 +2,27 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/post_margin"
+    android:layout_marginBottom="@dimen/post_margin"
     >
+
+    <ImageView
+        android:layout_width="@dimen/thumbnail_size"
+        android:layout_height="@dimen/thumbnail_size"
+        android:contentDescription="@string/thumbnail_image"
+        android:id="@+id/image_imageView"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
     <TextView
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:id="@+id/title_textView"
         android:padding="0dp"
-        android:textColor="#000000"
-        android:text="TITLE"
+        android:textColor="@android:color/black"
+        android:text="@string/title_placeholder"
         android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_toStartOf="@+id/upvotes_textView"
+        android:layout_toEndOf="@id/image_imageView"
         android:layout_marginStart="@dimen/text_view_padding"
         android:layout_marginEnd="@dimen/text_view_padding"
     />
@@ -21,31 +31,33 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="USERNAME"
+        android:text="@string/username_placeholder"
         android:textColor="@color/username_color"
         android:id="@+id/user_textView"
+        android:layout_toEndOf="@id/image_imageView"
         android:layout_below="@+id/title_textView"
-        android:layout_alignParentStart="true"
         android:layout_marginStart="@dimen/text_view_padding"
     />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/upvotes_textView"
-        android:text="UPVOTES"
-        android:textColor="#ffff9132"
+        android:text="@string/upvotes_placeholder"
+        android:textColor="@color/upvotes_color"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
+        android:gravity="end"
+        android:layout_toEndOf="@id/title_textView"
         android:layout_marginEnd="@dimen/text_view_padding"
         />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/age_textView"
-        android:text="AGE"
+        android:text="@string/age_placeholder"
         android:layout_alignParentEnd="true"
         android:layout_below="@+id/title_textView"
-        android:textColor="#000000"
+        android:textColor="@android:color/black"
         android:layout_marginEnd="@dimen/text_view_padding"
         />
 
@@ -53,19 +65,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/title_textView"
-        android:text="URL"
+        android:text="@string/url_placeholder"
         android:textColor="@color/unclicked_link_color"
         android:layout_toEndOf="@id/user_textView"
         android:id="@+id/url_textView"
         android:layout_marginStart="12dp"/>
 
-    <!--
-    <ImageView
-        android:layout_width="@dimen/thumbnail_size"
-        android:layout_height="@dimen/thumbnail_size"
-        android:id="@+id/image_ImageView"
-        android:src="@drawable/default_thumbnail"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true" />
-        -->
 </RelativeLayout>

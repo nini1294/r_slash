@@ -1,10 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="actionbar_color">#3F51B5</color>
-    <color name="statusbar_color">#303F9F</color>
+
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#e91e63</color>
+
+    <color name="actionbar_color">@color/colorPrimary</color>
+    <color name="statusbar_color">@color/colorPrimaryDark</color>
+    <color name="accent_color">@color/colorAccent</color>
     <color name="post_unclicked_color">#ffffffff</color>
-    <color name="tab_color">#ff2d2d2d</color>
+    <color name="tab_color">@color/colorPrimary</color>
     <color name="unclicked_link_color">#ff1700a7</color>
     <color name="clicked_link_color">#ff570093</color>
     <color name="username_color">#ff858585</color>
+    <color name="upvotes_color">#ffff9132</color>
+
+    <color name="refresh_progress_2">@color/colorPrimaryDark</color>
+    <color name="refresh_progress_1">@color/colorAccent</color>
+    <!--<color name="refresh_progress_3">@color/theme_primary</color>-->
 </resources>
